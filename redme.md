@@ -1,1 +1,1 @@
-This is for AWS
+This is for ip geolocator

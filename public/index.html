@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IP Geolocation Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .location-box {
+      margin-top: 30px;
+      display: none;
+      padding: 20px;
+      border: 1px solid #ccc;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Would you like to know your location?</h1>
+  <button onclick="fetchLocation()">View My Location</button>
+
+  <div class="location-box" id="locationBox">
+    <h2>Your Location:</h2>
+    <p><strong>IP:</strong> <span id="ip"></span></p>
+    <p><strong>Country:</strong> <span id="country"></span></p>
+    <p><strong>Region:</strong> <span id="region"></span></p>
+    <p><strong>City:</strong> <span id="city"></span></p>
+    <p><strong>ISP:</strong> <span id="isp"></span></p>
+  </div>
+
+  <script>
+    async function fetchLocation() {
+      try {
+        const response = await fetch('/geolocate');
+        const data = await response.json();
+
+        document.getElementById('ip').textContent = data.query || 'N/A';
+        document.getElementById('country').textContent = data.country || 'N/A';
+        document.getElementById('region').textContent = data.regionName || 'N/A';
+        document.getElementById('city').textContent = data.city || 'N/A';
+        document.getElementById('isp').textContent = data.isp || 'N/A';
+
+        document.getElementById('locationBox').style.display = 'block';
+      } catch (error) {
+        alert('Failed to fetch location');
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

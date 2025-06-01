@@ -31,4 +31,4 @@ docker run -d -p 3000:3000 thiluck/ip-geolocation-microservice
   - (Skip) tests
   - Build Docker image
   - Push to Docker Hub
-  - Deploy to localhost
+  - Deploy to localhost .

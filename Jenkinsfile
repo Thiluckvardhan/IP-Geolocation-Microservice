@@ -6,49 +6,51 @@ pipeline {
     }
 
     stages {
+
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }  
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm ci'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'npm test || echo "No tests found, skipping"'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t %DOCKER_IMAGE% ."
+                timeout(time: 10, unit: 'MINUTES') {
+                    bat "docker build -t %DOCKER_IMAGE% ."
+                }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat """
-                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                    docker push %DOCKER_IMAGE%
-                    """
-                }
+                bat 'docker push %DOCKER_IMAGE%'
             }
         }
-
-        stage('Deploy') {
+        stage('Verify') {
             steps {
-                bat """
-                docker stop ip-geo-container || exit 0
-                docker rm ip-geo-container || exit 0
-                docker run -d --name ip-geo-container -p 3000:3000 %DOCKER_IMAGE%
-                """
+                bat 'docker ps -a'
             }
         }
+    }
+}
+post {
+    success {
+        echo "✅ Build Successful! 🎉"
+    }
+    failure {
+        echo "❌ Build Failed! Please check the logs for details."
     }
 }

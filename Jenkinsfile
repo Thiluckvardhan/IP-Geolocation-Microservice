@@ -26,24 +26,28 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t $DOCKER_IMAGE ."
+                bat "docker build -t %DOCKER_IMAGE% ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                    bat "docker push $DOCKER_IMAGE"
+                    bat """
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    docker push %DOCKER_IMAGE%
+                    """
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                bat "docker stop ip-geo-container || true"
-                bat "docker rm ip-geo-container || true"
-                bat "docker run -d --name ip-geo-container -p 3000:3000 $DOCKER_IMAGE"
+                bat """
+                docker stop ip-geo-container || exit 0
+                docker rm ip-geo-container || exit 0
+                docker run -d --name ip-geo-container -p 3000:3000 %DOCKER_IMAGE%
+                """
             }
         }
     }

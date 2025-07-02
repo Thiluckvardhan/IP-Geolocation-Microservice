@@ -5,9 +5,9 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy files
-COPY package*.json ./
-RUN npm ci
+# COPY package*.json ./
 COPY . .
+RUN npm ci
 
 # Expose port
 EXPOSE 3000

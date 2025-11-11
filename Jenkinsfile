@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+// hi
     environment {
         DOCKER_IMAGE = 'thiluck/ip-geolocation-microservice:latest'
     }
